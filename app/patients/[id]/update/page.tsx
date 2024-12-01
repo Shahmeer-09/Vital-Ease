@@ -10,7 +10,6 @@ const Update = async ({ params }: { params: Promise<{ id: string }> }) => {
   const user = await CurrentUser((await params)?.id);
    const CurrentPatient = await getPatient(user?.$id)
    const patientdata:Partial<UpdatePatient> =CurrentPatient?.documents[0] 
-   const imageUrl  = await getFilePreview(patientdata.identificationDocumentId!)
    const url = await getFilePreview(patientdata.identificationDocumentId!)
   return (
     <div className="flex h-screen max-h-screen  ">
