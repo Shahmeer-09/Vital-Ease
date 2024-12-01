@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export const createPatient = async (user: CreateUserParams) => {
-  console.log(user);  
+  console.log(user);
   try {
     const existingUser = await users.list([Query.equal("email", [user.email])]);
     if (existingUser.users.length > 0) {
@@ -24,15 +24,19 @@ export const createPatient = async (user: CreateUserParams) => {
     );
 
     return {
+      status: "success",
       msg: "User created successfully",
       user: User,
     };
   } catch (error: any) {
-    console.error("Error creating user:", error);
-    return {
-      msg: "Something went wrong",
-      user: null,
-    };
+    console.log(error);
+    if (error instanceof AppwriteException) {
+      return {
+        status: "error",
+        msg: error.message,
+        user: null,
+      };
+    }
   }
 };
 
@@ -80,7 +84,7 @@ export const UpdateUser = async ({
       documentId!,
       data
     );
-    revalidatePath(`/`)
+    revalidatePath(`/`);
     return {
       status: "success",
       data: JSON.parse(JSON.stringify(response)),
@@ -153,16 +157,16 @@ export const getPatient = async (userId: string) => {
   }
 };
 
-
-
-
 export async function getFilePreview(fileId: string) {
   try {
-    const result = await storage.getFilePreview(process.env.NEXT_PUBLIC_BUCKET_ID!, fileId);
-    const base64 = Buffer.from(result).toString('base64');
+    const result = await storage.getFilePreview(
+      process.env.NEXT_PUBLIC_BUCKET_ID!,
+      fileId
+    );
+    const base64 = Buffer.from(result).toString("base64");
     return `data:image/webp;base64,${base64}`;
   } catch (error) {
-    console.error('Error fetching file preview:', error);
+    console.error("Error fetching file preview:", error);
     return null;
   }
 }

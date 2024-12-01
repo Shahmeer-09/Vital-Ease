@@ -11,6 +11,7 @@ import { patientformSchema } from "@/lib/ZodSchema";
 import { createPatient } from "@/lib/actions/patient.action";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 export enum FormFieldType {
   INPUT = "input",
   PHONEINPUT = "phoneinput",
@@ -41,13 +42,15 @@ const PatientForm = () => {
     setisloading(true);
     try {
       const res = await createPatient({ name, email, phone });
-      if(res.user==null) {
+      if (res?.status == "error") {
+        toast.error(res.msg);
         setisloading(false);
         return;
       }
-      router.push(`/patients/${res.user.$id}/register`);
-      setisloading(false);
-   
+      if (res?.user) {
+        router.push(`/patients/${res?.user.$id}/register`);
+        setisloading(false);
+      }
     } catch (error) {
       setisloading(false);
     }
@@ -86,7 +89,7 @@ const PatientForm = () => {
           placeholder=" 03XX XXXXXXX"
           iconSource={Phone}
         />
-        <Submitbtn isloading={islaoding} >Submit</Submitbtn>
+        <Submitbtn isloading={islaoding}>Submit</Submitbtn>
       </form>
     </Form>
   );
